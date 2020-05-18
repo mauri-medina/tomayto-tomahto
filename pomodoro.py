@@ -9,6 +9,8 @@ import sys
 
 from datetime import datetime, timedelta
 
+import config
+
 
 class Timer:
     """
@@ -16,28 +18,34 @@ class Timer:
     """
 
     def __init__(self, seconds: int, timer_finish_callback):
-
-        self._timer_total_time = seconds
+        self._initial_total_time = seconds
         self._time_delta = timedelta(seconds=seconds)
 
-        self._timer_finish_callback = timer_finish_callback
+        self._finish_callback = timer_finish_callback
 
         self._last_tick_time = None
-        self._is_running = True
+        self._is_running = False
         self._is_finished = False
-
-        self.start()
 
     def start(self) -> None:
         self._is_running = True
 
-    def pause(self) -> None:
+    def stop(self) -> None:
         self._is_running = False
 
-    def resume(self):
-        self._is_running = True
+    def reset(self) -> None:
+        self._time_delta = timedelta(seconds=self._initial_total_time)
+        self._last_tick_time = None
+        self._is_running = False
+        self._is_finished = False
 
-    def tick(self) -> None:
+    def is_running(self) -> bool:
+        return self._is_running
+
+    def set_total_seconds(self, seconds: int):
+        self._initial_total_time = seconds
+
+    def tick(self) -> str:
         if self._is_finished:
             return
 
@@ -51,10 +59,11 @@ class Timer:
             delta_time = now - self._last_tick_time
             self._time_delta -= timedelta(microseconds=delta_time.microseconds)
 
-            if self._time_delta.seconds <= 0.0:
+            if self._time_delta.seconds <= 0.0 and self.is_running():
                 self._end_timer()
 
         self._last_tick_time = now
+        return self.get_time_str()
 
     def get_time_str(self) -> str:
         hour, minute, seconds = str(self._time_delta).split(':')
@@ -63,13 +72,6 @@ class Timer:
     def _end_timer(self):
         self._is_finished = True
         self._timer_finish_callback()
-
-    # TODO sacar esto de aca
-    # def process_event(self, event):
-    #     if isinstance(event, KeyboardEvent):
-    #         key = event.key_code
-    #         if key == Screen.KEY_UP:
-    #             self._is_running = not self._is_running
 
 
 class TimerEffect(Effect):
@@ -107,12 +109,10 @@ class TimerEffect(Effect):
         pass
 
     def _update(self, frame_no):
-
         # We can't save timer as a variable because
         # effects are created every time the screen is resized
         global timer
-        timer.tick()
-        new_text = timer.get_time_str()
+        new_text = timer.tick()
 
         # only draw when text is changed to avoid flickering(updates to fast)
         if new_text != self._old_text:
@@ -134,11 +134,51 @@ class TimerEffect(Effect):
         pass
 
 
+class KeyboardHandler(Effect):
+    """
+    Effect used for keyboard input handler, does not render anything
+    """
+
+    def __init__(self, screen: Screen, **kwargs):
+        super(KeyboardHandler, self).__init__(screen, **kwargs)
+
+    def process_event(self, event):
+        if isinstance(event, KeyboardEvent):
+            key = event.key_code
+            if key == 32:   # Space bar key
+                if timer.is_running():
+                    timer.stop()
+                else:
+                    timer.start()
+            elif key == ord('r'):
+                timer.reset()
+            elif key == ord('p'):
+                timer.set_total_seconds(config.time['pomodoro']['s'])
+                timer.reset()
+                timer.start()
+            elif key == ord('s'):
+                timer.set_total_seconds(config.time['short_break']['s'])
+                timer.reset()
+                timer.start()
+            elif key == ord('l'):
+                timer.set_total_seconds(config.time['long_break']['s'])
+                timer.reset()
+                timer.start()
+
+    def reset(self):
+        pass
+
+    def _update(self, frame_no):
+        pass
+
+    @property
+    def stop_frame(self):
+        pass
 
 
 def pomodoro(screen: Screen) -> None:
-
     effects = [TimerEffect(screen, 50, screen.height // 2)]
+    effects.append(KeyboardHandler(screen))
     screen.play([Scene(effects, -1)], stop_on_resize=True)
 
 
