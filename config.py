@@ -1,4 +1,22 @@
-time = dict(  # Time in minutes
+# Text colors for use when printing to the Screen.
+COLOR_BLACK = 0
+COLOR_RED = 1
+COLOR_GREEN = 2
+COLOR_YELLOW = 3
+COLOR_BLUE = 4
+COLOR_MAGENTA = 5
+COLOR_CYAN = 6
+COLOR_WHITE = 7
+
+config = dict(
+    timer={
+        'font': 'standard',
+        'font_color': COLOR_MAGENTA,
+        'background_color': COLOR_YELLOW,
+    },
+)
+
+time = dict(
     pomodoro={
         'm': 25,
         's': 25 * 60},
@@ -8,21 +26,4 @@ time = dict(  # Time in minutes
     long_break={
         'm': 10,
         's': 10 * 60}
-)
-
-key_code = dict(
-    space=32,
-    p=112,
-    s=115,
-    l=108,
-    r=114
-)
-
-action_key_code = dict(
-    start=32,  # space key
-    stop=32,  # space key
-    reset_timer=ord('r'),
-    pomodoro_time=ord('p'),
-    short_break=ord('s'),
-    long_break=ord('l'),
 )

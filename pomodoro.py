@@ -142,7 +142,11 @@ class PomodoroController(Scene):
     def __init__(self, screen: Screen):
         self._screen = screen
 
-        effects = [TimerEffect(screen, 50, self._screen.height // 2)]
+        effects = [TimerEffect(
+            screen, 50, self._screen.height // 2,
+            font=config.config['timer']['font'],
+            font_color=config.config['timer']['font_color'],
+            background_color=config.config['timer']['background_color'])]
 
         super(PomodoroController, self).__init__(effects, -1)
 
