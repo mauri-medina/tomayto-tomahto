@@ -10,19 +10,17 @@ import sys
 from datetime import datetime, timedelta
 
 
-# use Effect class for the update method and the keyboard events, Timer does not render anything
-class Timer(Effect):
+class Timer:
     """
-    Timer counting down to zero, does not render anything
+    Timer that store information for remaining time
     """
 
-    def __init__(self, seconds: int, screen: Screen, **kwargs):
-
-        super(Timer, self).__init__(screen, **kwargs)
+    def __init__(self, seconds: int, timer_finish_callback):
 
         self._timer_total_time = seconds
         self._time_delta = timedelta(seconds=seconds)
-        self._screen = screen
+
+        self._timer_finish_callback = timer_finish_callback
 
         self._last_tick_time = None
         self._is_running = True
@@ -39,12 +37,11 @@ class Timer(Effect):
     def resume(self):
         self._is_running = True
 
-    def _update(self, frame_no) -> None:
+    def tick(self) -> None:
         if self._is_finished:
             return
 
         now = datetime.now()
-        # self.handle_keyboard_event(self._screen.get_event())
 
         # is the first tick of the timer?
         if self._last_tick_time is None:
@@ -65,29 +62,22 @@ class Timer(Effect):
 
     def _end_timer(self):
         self._is_finished = True
-        # TODO llamar callback para avisarle a todos que termino
+        self._timer_finish_callback()
 
-    def process_event(self, event):
-        if isinstance(event, KeyboardEvent):
-            key = event.key_code
-            if key == Screen.KEY_UP:
-                self._is_running = not self._is_running
-
-    @property
-    def stop_frame(self):
-        pass
-
-    def reset(self):
-        pass
+    # TODO sacar esto de aca
+    # def process_event(self, event):
+    #     if isinstance(event, KeyboardEvent):
+    #         key = event.key_code
+    #         if key == Screen.KEY_UP:
+    #             self._is_running = not self._is_running
 
 
-# I think its better to separate the render from the timer in case that we want more than one type of render effect
 class TimerEffect(Effect):
     """
     Renders a timer time in the screen.
     """
 
-    def __init__(self, screen: Screen, timer: Timer,
+    def __init__(self, screen: Screen,
                  x: int, y: int,
                  font='standard', width=200,
                  font_color=Screen.COLOUR_GREEN, background_color=Screen.COLOUR_BLACK, **kwargs):
@@ -105,7 +95,6 @@ class TimerEffect(Effect):
         super(TimerEffect, self).__init__(screen, **kwargs)
 
         self._screen = screen
-        self._timer = timer
         self._x = x
         self._y = y
         self._font = font
@@ -118,7 +107,12 @@ class TimerEffect(Effect):
         pass
 
     def _update(self, frame_no):
-        new_text = self._timer.get_time_str()
+
+        # We can't save timer as a variable because
+        # effects are created every time the screen is resized
+        global timer
+        timer.tick()
+        new_text = timer.get_time_str()
 
         # only draw when text is changed to avoid flickering(updates to fast)
         if new_text != self._old_text:
@@ -140,14 +134,22 @@ class TimerEffect(Effect):
         pass
 
 
+
+
 def pomodoro(screen: Screen) -> None:
-    timer = Timer(1500, screen)
-    effects = [timer, TimerEffect(screen, timer, 50, y=screen.height // 2)]
+
+    effects = [TimerEffect(screen, 50, screen.height // 2)]
     screen.play([Scene(effects, -1)], stop_on_resize=True)
 
-    # TODO: global key handler: hay una opcion usando escenas(buscar en documentacion)
+
+timer = Timer(1500, None)
+
+# This is the start of the Screen
+# This method is called every time the screen is resized, so from here on everything must be stateless
+import winsound
 
 while True:
+    winsound.Beep(440, 500)
     try:
         Screen.wrapper(pomodoro)
         sys.exit(0)
