@@ -111,7 +111,6 @@ class TimerEffect(Effect):
     def _update(self, frame_no):
         # We can't save timer as a variable because
         # effects are created every time the screen is resized
-        global timer
         new_text = timer.tick()
 
         # only draw when text is changed to avoid flickering(updates to fast)
@@ -134,18 +133,28 @@ class TimerEffect(Effect):
         pass
 
 
-class KeyboardHandler(Effect):
+class PomodoroController(Scene):
     """
-    Effect used for keyboard input handler, does not render anything
+    Scene to control the pomodoro application
+    This class handles the user input, updating required Effects as needed
     """
 
-    def __init__(self, screen: Screen, **kwargs):
-        super(KeyboardHandler, self).__init__(screen, **kwargs)
+    def __init__(self, screen: Screen):
+        self._screen = screen
+
+        effects = [TimerEffect(screen, 50, self._screen.height // 2)]
+
+        super(PomodoroController, self).__init__(effects, -1)
 
     def process_event(self, event):
+        # Allow standard event processing first
+        if super(PomodoroController, self).process_event(event) is None:
+            return
+
+        # check for my key handlers
         if isinstance(event, KeyboardEvent):
             key = event.key_code
-            if key == 32:   # Space bar key
+            if key == 32:  # Space bar key
                 if timer.is_running():
                     timer.stop()
                 else:
@@ -164,34 +173,26 @@ class KeyboardHandler(Effect):
                 timer.set_total_seconds(config.time['long_break']['s'])
                 timer.reset()
                 timer.start()
-
-    def reset(self):
-        pass
-
-    def _update(self, frame_no):
-        pass
-
-    @property
-    def stop_frame(self):
-        pass
+        else:
+            return event
 
 
 def pomodoro(screen: Screen) -> None:
-    effects = [TimerEffect(screen, 50, screen.height // 2)]
-    effects.append(KeyboardHandler(screen))
-    screen.play([Scene(effects, -1)], stop_on_resize=True)
+    screen.play([PomodoroController(screen)], stop_on_resize=True)
 
 
-timer = Timer(1500, None)
-
-# This is the start of the Screen
-# This method is called every time the screen is resized, so from here on everything must be stateless
+# TODO remove this, is only used for debug
 import winsound
 
-while True:
-    winsound.Beep(440, 500)
-    try:
-        Screen.wrapper(pomodoro)
-        sys.exit(0)
-    except ResizeScreenError:
-        pass
+if __name__ == "__main__":
+    timer = Timer(config.time['pomodoro']['s'], None)
+
+    # This is the start of the Screen
+    # Is called every time the screen is resized, so from here on everything must be stateless
+    while True:
+        winsound.Beep(440, 500)
+        try:
+            Screen.wrapper(pomodoro)
+            sys.exit(0)
+        except ResizeScreenError:
+            pass
