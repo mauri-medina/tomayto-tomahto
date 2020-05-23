@@ -104,6 +104,7 @@ class TimerEffect(Effect):
         self._font_color = font_color
         self._bg_color = background_color
         self._old_text = ''
+        self._renderer = None
 
     def reset(self):
         pass
@@ -113,20 +114,37 @@ class TimerEffect(Effect):
         # effects are created every time the screen is resized
         new_text = timer.tick()
 
-        # only draw when text is changed to avoid flickering(updates to fast)
         if new_text != self._old_text:
             self._old_text = new_text
 
-            renderer = FigletText(new_text)
-            image, colours = renderer.rendered_text
+            old_image = None
+            if self._renderer:
+                old_image, _ = self._renderer.rendered_text
 
-            # If screen is not cleared old numbers may still be visible after update
-            self._screen.clear()
+            self._renderer = FigletText(new_text, font=self._font)
+            new_image, colours = self._renderer.rendered_text
 
-            for (i, line) in enumerate(image):
+            # Draw new image
+            new_image_max_line_len = -1
+            for (i, line) in enumerate(new_image):
+                size = len(line)
+                if size > new_image_max_line_len:
+                    new_image_max_line_len = size
+
                 self._screen.paint(
                     line, self._x, self._y + i,
                     colour=self._font_color, bg=self._bg_color)
+
+            # If old image is longer than current image we must clear old image left over
+            if old_image:
+                for (i, line) in enumerate(old_image):
+                    old_line_size = len(line)
+                    if old_line_size > new_image_max_line_len:
+                        filler_size = old_line_size - new_image_max_line_len
+                        self._screen.paint(" " * filler_size, self._x + len(new_image[i]), self._y + i)
+
+
+
 
     @property
     def stop_frame(self):
