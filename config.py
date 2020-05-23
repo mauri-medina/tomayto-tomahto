@@ -8,12 +8,10 @@ COLOR_MAGENTA = 5
 COLOR_CYAN = 6
 COLOR_WHITE = 7
 
-config = dict(
-    timer={
-        'font': 'standard',
-        'font_color': COLOR_MAGENTA,
-        'background_color': COLOR_YELLOW,
-    },
+timer = dict(
+    font='standard',
+    font_color=COLOR_MAGENTA,
+    background_color=COLOR_YELLOW
 )
 
 time = dict(
