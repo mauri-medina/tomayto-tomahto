@@ -22,13 +22,13 @@ class Timer:
     """
 
     def __init__(self, seconds: int, timer_finish_callback):
-        self._total_time = seconds
         self._finish_callback = timer_finish_callback
 
+        self.set_total_seconds(seconds)
         self._setup_timer()
 
     def _setup_timer(self):
-        self._time_delta = timedelta(seconds=self._total_time)
+        self.accumulated_microseconds = 0
         self._last_tick_time = None
         self._is_running = False
         self._is_finished = False
@@ -46,7 +46,8 @@ class Timer:
         return self._is_running
 
     def set_total_seconds(self, seconds: int):
-        self._total_time = seconds
+        self._total_time_seconds = seconds
+        self._total_time_microseconds = self._total_time_seconds * 1000000
 
     def tick(self) -> None:
         if self._is_finished:
@@ -60,15 +61,20 @@ class Timer:
 
         if self._is_running:
             delta_time = now - self._last_tick_time
-            self._time_delta -= timedelta(microseconds=delta_time.microseconds)
 
-            if self._time_delta.seconds <= 0.0 and self.is_running():
+            self.accumulated_microseconds += delta_time.microseconds
+            dt = self._total_time_microseconds - self.accumulated_microseconds
+            if dt <= 0.0 and self.is_running():
                 self._end_timer()
 
         self._last_tick_time = now
 
     def get_time_str(self) -> str:
-        hour, minute, seconds = str(self._time_delta).split(':')
+        # we need to take on account that a seconds pass when 1000000 microseconds has passed
+        # if we not do this, 0 seconds with 50000 microseconds left it's considered as 0 seconds but its not yet zero
+        accumulated_seconds = self.accumulated_microseconds // 1000000
+        dt = self._total_time_seconds - accumulated_seconds
+        hour, minute, seconds = str(timedelta(seconds=dt)).split(':')
         return ':'.join([minute, seconds.split('.')[0]])
 
     def _end_timer(self):
