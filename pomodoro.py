@@ -21,10 +21,10 @@ class Timer:
     Timer that store information for remaining time
     """
 
-    def __init__(self, seconds: int, timer_finish_callback):
+    def __init__(self, minutes: int, timer_finish_callback):
         self._finish_callback = timer_finish_callback
 
-        self.set_total_seconds(seconds)
+        self.set_total_time(minutes)
         self._setup_timer()
 
     def _setup_timer(self):
@@ -45,8 +45,8 @@ class Timer:
     def is_running(self) -> bool:
         return self._is_running
 
-    def set_total_seconds(self, seconds: int):
-        self._total_time_seconds = seconds
+    def set_total_time(self, minutes: int):
+        self._total_time_seconds = minutes * 60
         self._total_time_microseconds = self._total_time_seconds * 1000000
 
     def tick(self) -> None:
@@ -211,15 +211,15 @@ class PomodoroController(Scene):
             elif key == ord('r'):
                 timer.reset()
             elif key == ord('p'):
-                timer.set_total_seconds(config.time['pomodoro']['s'])
+                timer.set_total_time(config.time['pomodoro']['m'])
                 timer.reset()
                 timer.start()
             elif key == ord('s'):
-                timer.set_total_seconds(config.time['short_break']['s'])
+                timer.set_total_time(config.time['short_break']['m'])
                 timer.reset()
                 timer.start()
             elif key == ord('l'):
-                timer.set_total_seconds(config.time['long_break']['s'])
+                timer.set_total_time(config.time['long_break']['m'])
                 timer.reset()
                 timer.start()
             elif key == ord('h'):
@@ -248,7 +248,7 @@ def pomodoro(screen: Screen) -> None:
 
 
 if __name__ == "__main__":
-    timer = Timer(config.time['pomodoro']['s'], None)
+    timer = Timer(config.time['pomodoro']['m'], None)
 
     # This is the start of the Screen
     # Is called every time the screen is resized, so from here on everything must be stateless

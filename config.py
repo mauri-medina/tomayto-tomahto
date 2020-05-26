@@ -21,14 +21,11 @@ timer = dict(
 
 time = dict(
     pomodoro={
-        'm': 25,
-        's': 5},
+        'm': 25},
     short_break={
-        'm': 5,
-        's': 5 * 60},
+        'm': 5},
     long_break={
-        'm': 10,
-        's': 10 * 60}
+        'm': 10}
 )
 
 instructions = dict(
