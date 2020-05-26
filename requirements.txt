@@ -5,3 +5,4 @@ pyfiglet==0.8.post1
 pypiwin32==223
 pywin32==227
 wcwidth==0.1.9
+playsound>=1.2.2
