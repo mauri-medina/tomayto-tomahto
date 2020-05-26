@@ -40,6 +40,7 @@ instructions = dict(
          'R  Reset Timer                 \n'
          'H  Show/Hide Instructions      ',
     position={
+        # Top left corner
         'x': 5,  # %
         'y': 50,  # %
     },

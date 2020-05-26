@@ -15,17 +15,20 @@ import os.path
 import config
 
 
+# Timer must be outside of a scene or effect because those objects reset everytime the screen is resized
 class Timer:
     """
     Timer that store information for remaining time
     """
 
     def __init__(self, seconds: int, timer_finish_callback):
-        self._initial_total_time = seconds
-        self._time_delta = timedelta(seconds=seconds)
-
+        self._total_time = seconds
         self._finish_callback = timer_finish_callback
 
+        self._setup_timer()
+
+    def _setup_timer(self):
+        self._time_delta = timedelta(seconds=self._total_time)
         self._last_tick_time = None
         self._is_running = False
         self._is_finished = False
@@ -37,16 +40,13 @@ class Timer:
         self._is_running = False
 
     def reset(self) -> None:
-        self._time_delta = timedelta(seconds=self._initial_total_time)
-        self._last_tick_time = None
-        self._is_running = False
-        self._is_finished = False
+        self._setup_timer()
 
     def is_running(self) -> bool:
         return self._is_running
 
     def set_total_seconds(self, seconds: int):
-        self._initial_total_time = seconds
+        self._total_time = seconds
 
     def tick(self) -> None:
         if self._is_finished:
