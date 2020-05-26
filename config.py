@@ -29,6 +29,7 @@ time = dict(
 )
 
 instructions = dict(
+    show_at_start=False,
     text='Keyboard Shortcuts             \n' 
          'SPACE Start or Stop the timer  \n' 
          'P  Pomodoro                    \n' 

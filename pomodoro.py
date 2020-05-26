@@ -175,6 +175,14 @@ class PomodoroController(Scene):
 
         timer.set_on_end_timer_listener(self.on_timer_finish)
 
+        effects = []
+
+        # Create Instructions effect
+        self._instructions = None
+        if config.instructions['show_at_start']:
+            self._instructions = self._create_instructions_effect()
+            effects.append(self._instructions)
+
         # Create timer effect
         x = int(self._screen.width * (config.timer['position']['x'] / 100))
         y = int(self._screen.height * (config.timer['position']['y'] / 100))
@@ -185,10 +193,8 @@ class PomodoroController(Scene):
             font_color=config.timer['font_color'],
             background_color=config.timer['background_color'])
 
-        # Create Instructions effect
-        self._instructions = self._create_instructions_effect()
+        effects.append(self._timer_effect)
 
-        effects = [self._instructions, self._timer_effect]
         super(PomodoroController, self).__init__(effects, -1)
 
     def on_timer_finish(self):
@@ -229,7 +235,7 @@ class PomodoroController(Scene):
             return event
 
     def _toggle_instructions_visibility(self):
-        if self._instructions in self.effects:
+        if self._instructions and self._instructions in self.effects:
             # remove effect from scene and clear it in the next frame
             self._instructions.delete_count = 1
         else:
