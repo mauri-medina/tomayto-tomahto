@@ -216,21 +216,21 @@ class PomodoroController(Scene):
                     timer.stop()
                 else:
                     timer.start()
-            elif key == config.keys['reset_timer']:
+            elif key == ord(config.keys['reset_timer']):
                 timer.reset()
-            elif key == config.keys['time_pomodoro']:
+            elif key == ord(config.keys['time_pomodoro']):
                 timer.set_total_time(config.time['pomodoro']['m'])
                 timer.reset()
                 timer.start()
-            elif key == config.keys['time_short_break']:
+            elif key == ord(config.keys['time_short_break']):
                 timer.set_total_time(config.time['short_break']['m'])
                 timer.reset()
                 timer.start()
-            elif key == config.keys['time_long_break']:
+            elif key == ord(config.keys['time_long_break']):
                 timer.set_total_time(config.time['long_break']['m'])
                 timer.reset()
                 timer.start()
-            elif key == config.keys['show_hide_instructions']:
+            elif key == ord(config.keys['show_hide_instructions']):
                 self._toggle_instructions_visibility()
 
         else:

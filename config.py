@@ -28,15 +28,24 @@ time = dict(
         'm': 10}
 )
 
+keys = dict(
+    time_pomodoro='p',
+    time_short_break='s',
+    time_long_break='l',
+    reset_timer='r',
+    show_hide_instructions='h',
+    start_stop_timer=32             # space key code
+)
+
 instructions = dict(
     show_at_start=True,
     text='Keyboard Shortcuts             \n' 
-         'SPACE Start or Stop the timer  \n' 
-         'P  Pomodoro                    \n' 
-         'S  Short Break                 \n'
-         'L  Long Break                  \n'
-         'R  Reset Timer                 \n'
-         'H  Show/Hide Instructions      ',
+         'SPACE Start or Stop the timer  \n' +
+         keys['time_pomodoro'].capitalize()          + '  Pomodoro                    \n'+
+         keys['time_short_break'].capitalize()       + '  Short Break                 \n'+
+         keys['time_long_break'].capitalize()        + '  Long Break                  \n'+
+         keys['reset_timer'].capitalize()            + '  Reset Timer                 \n'+
+         keys['show_hide_instructions'].capitalize() + '  Show/Hide Instructions      ',
     position={
         # Top left corner
         'x': 5,  # %
@@ -46,11 +55,3 @@ instructions = dict(
 
 alarm_sound_file = 'analog-alarm-clock.wav'
 
-keys = dict(
-    time_pomodoro=ord('p'),
-    time_short_break=ord('s'),
-    time_long_break=ord('l'),
-    reset_timer=ord('r'),
-    show_hide_instructions=ord('h'),
-    start_stop_timer=32             # space key code
-)
