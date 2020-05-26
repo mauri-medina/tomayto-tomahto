@@ -1,6 +1,6 @@
 from asciimatics.screen import Screen
-from asciimatics.effects import Effect
-from asciimatics.renderers import FigletText
+from asciimatics.effects import Effect, Print
+from asciimatics.renderers import FigletText, SpeechBubble
 from asciimatics.scene import Scene
 from asciimatics.exceptions import ResizeScreenError
 from asciimatics.event import KeyboardEvent
@@ -9,6 +9,9 @@ import sys
 
 from datetime import datetime, timedelta
 
+from playsound import playsound
+import threading
+import os.path
 import config
 
 
@@ -45,7 +48,7 @@ class Timer:
     def set_total_seconds(self, seconds: int):
         self._initial_total_time = seconds
 
-    def tick(self) -> str:
+    def tick(self) -> None:
         if self._is_finished:
             return
 
@@ -63,7 +66,6 @@ class Timer:
                 self._end_timer()
 
         self._last_tick_time = now
-        return self.get_time_str()
 
     def get_time_str(self) -> str:
         hour, minute, seconds = str(self._time_delta).split(':')
@@ -71,7 +73,14 @@ class Timer:
 
     def _end_timer(self):
         self._is_finished = True
-        self._timer_finish_callback()
+        if self._finish_callback:
+            # Use a thread to not hang up the application until the sound finish playing
+            th = threading.Thread(target=self._finish_callback)
+            th.start()
+
+    def set_on_end_timer_listener(self, listener: any) -> None:
+        self._finish_callback = listener
+
 
 
 class TimerEffect(Effect):
@@ -112,9 +121,11 @@ class TimerEffect(Effect):
     def _update(self, frame_no):
         # We can't save timer as a variable because
         # effects are created every time the screen is resized
-        new_text = timer.tick()
+        timer.tick()
+        new_text = timer.get_time_str()
 
         if new_text != self._old_text:
+
             self._old_text = new_text
 
             old_image = None
@@ -143,9 +154,6 @@ class TimerEffect(Effect):
                         filler_size = old_line_size - new_image_max_line_len
                         self._screen.paint(" " * filler_size, self._x + len(new_image[i]), self._y + i)
 
-
-
-
     @property
     def stop_frame(self):
         pass
@@ -160,13 +168,27 @@ class PomodoroController(Scene):
     def __init__(self, screen: Screen):
         self._screen = screen
 
-        effects = [TimerEffect(
-            screen, self._screen.height // 2, self._screen.height // 2,
-            font=config.timer['font'],
-            font_color=config.timer['font_color'],
-            background_color=config.timer['background_color'])]
+        timer.set_on_end_timer_listener(self.on_timer_finish)
 
+        # Create timer effect
+        x = int(self._screen.width * (config.timer['position']['x'] / 100))
+        y = int(self._screen.height * (config.timer['position']['y'] / 100))
+
+        self._timer_effect = TimerEffect(
+                                        screen, x, y,
+                                        font=config.timer['font'],
+                                        font_color=config.timer['font_color'],
+                                        background_color=config.timer['background_color'])
+
+        # Create Instructions effect
+        self._instructions = self._create_instructions_effect()
+
+        effects = [self._instructions, self._timer_effect]
         super(PomodoroController, self).__init__(effects, -1)
+
+    def on_timer_finish(self):
+        path = os.path.join('resources', config.alarm_sound_file)
+        playsound(path)
 
     def process_event(self, event):
         # Allow standard event processing first
@@ -195,8 +217,25 @@ class PomodoroController(Scene):
                 timer.set_total_seconds(config.time['long_break']['s'])
                 timer.reset()
                 timer.start()
+            elif key == ord('h'):
+                self._toggle_instructions_visibility()
+
         else:
             return event
+
+    def _toggle_instructions_visibility(self):
+        if self._instructions in self.effects:
+            # remove effect from scene and clear it in the next frame
+            self._instructions.delete_count = 1
+        else:
+            # we have to create a new effect since the last one have been removed by the screen
+            self._instructions = self._create_instructions_effect()
+            self.add_effect(self._instructions)
+
+    def _create_instructions_effect(self):
+        x = int(self._screen.width * (config.instructions['position']['x'] / 100))
+        y = int(self._screen.height * (config.instructions['position']['y'] / 100))
+        return Print(self._screen, SpeechBubble(config.instructions['text'], uni=True), y, x)
 
 
 def pomodoro(screen: Screen) -> None:
@@ -212,7 +251,7 @@ if __name__ == "__main__":
     # This is the start of the Screen
     # Is called every time the screen is resized, so from here on everything must be stateless
     while True:
-        winsound.Beep(440, 500)
+        # winsound.Beep(440, 500)
         try:
             Screen.wrapper(pomodoro)
             sys.exit(0)

@@ -9,15 +9,19 @@ COLOR_CYAN = 6
 COLOR_WHITE = 7
 
 timer = dict(
-    font='standard',
-    font_color=COLOR_MAGENTA,
-    background_color=COLOR_YELLOW
+    font='larry3d',
+    font_color=COLOR_BLUE,
+    background_color=COLOR_GREEN,
+    position={
+        'x': 30,  # %
+        'y': 30,  # %
+    }
 )
 
 time = dict(
     pomodoro={
         'm': 25,
-        's': 25 * 60},
+        's': 5},
     short_break={
         'm': 5,
         's': 5 * 60},
@@ -25,3 +29,19 @@ time = dict(
         'm': 10,
         's': 10 * 60}
 )
+
+instructions = dict(
+    text='Keyboard Shortcuts             \n' 
+         'SPACE Start or Stop the timer  \n' 
+         'P  Pomodoro                    \n' 
+         'S  Short Break                 \n'
+         'L  Long Break                  \n'
+         'R  Reset Timer                 \n'
+         'H  Show/Hide Instructions      ',
+    position={
+        'x': 10,  # %
+        'y': 2,  # %
+    },
+)
+
+alarm_sound_file = 'analog-alarm-clock.wav'
