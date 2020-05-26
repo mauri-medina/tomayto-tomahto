@@ -82,7 +82,6 @@ class Timer:
         self._finish_callback = listener
 
 
-
 class TimerEffect(Effect):
     """
     Renders a timer time in the screen.
@@ -175,10 +174,10 @@ class PomodoroController(Scene):
         y = int(self._screen.height * (config.timer['position']['y'] / 100))
 
         self._timer_effect = TimerEffect(
-                                        screen, x, y,
-                                        font=config.timer['font'],
-                                        font_color=config.timer['font_color'],
-                                        background_color=config.timer['background_color'])
+            screen, x, y,
+            font=config.timer['font'],
+            font_color=config.timer['font_color'],
+            background_color=config.timer['background_color'])
 
         # Create Instructions effect
         self._instructions = self._create_instructions_effect()
@@ -242,16 +241,12 @@ def pomodoro(screen: Screen) -> None:
     screen.play([PomodoroController(screen)], stop_on_resize=True)
 
 
-# TODO remove this, is only used for debug
-import winsound
-
 if __name__ == "__main__":
     timer = Timer(config.time['pomodoro']['s'], None)
 
     # This is the start of the Screen
     # Is called every time the screen is resized, so from here on everything must be stateless
     while True:
-        # winsound.Beep(440, 500)
         try:
             Screen.wrapper(pomodoro)
             sys.exit(0)

@@ -13,8 +13,9 @@ timer = dict(
     font_color=COLOR_BLUE,
     background_color=COLOR_GREEN,
     position={
-        'x': 30,  # %
-        'y': 30,  # %
+        # Top lef corner
+        'x': 5,  # %
+        'y': 10,  # %
     }
 )
 
@@ -39,8 +40,8 @@ instructions = dict(
          'R  Reset Timer                 \n'
          'H  Show/Hide Instructions      ',
     position={
-        'x': 10,  # %
-        'y': 2,  # %
+        'x': 5,  # %
+        'y': 50,  # %
     },
 )
 
