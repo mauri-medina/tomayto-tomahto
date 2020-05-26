@@ -2,7 +2,7 @@ from asciimatics.screen import Screen
 from asciimatics.effects import Effect, Print
 from asciimatics.renderers import FigletText, SpeechBubble
 from asciimatics.scene import Scene
-from asciimatics.exceptions import ResizeScreenError
+from asciimatics.exceptions import ResizeScreenError, StopApplication
 from asciimatics.event import KeyboardEvent
 
 import sys
@@ -209,26 +209,28 @@ class PomodoroController(Scene):
         # check for my key handlers
         if isinstance(event, KeyboardEvent):
             key = event.key_code
-            if key == 32:  # Space bar key
+            if key == Screen.ctrl("c"):
+                raise StopApplication("User quit")
+            elif key == config.keys['start_stop_timer']:
                 if timer.is_running():
                     timer.stop()
                 else:
                     timer.start()
-            elif key == ord('r'):
+            elif key == config.keys['reset_timer']:
                 timer.reset()
-            elif key == ord('p'):
+            elif key == config.keys['time_pomodoro']:
                 timer.set_total_time(config.time['pomodoro']['m'])
                 timer.reset()
                 timer.start()
-            elif key == ord('s'):
+            elif key == config.keys['time_short_break']:
                 timer.set_total_time(config.time['short_break']['m'])
                 timer.reset()
                 timer.start()
-            elif key == ord('l'):
+            elif key == config.keys['time_long_break']:
                 timer.set_total_time(config.time['long_break']['m'])
                 timer.reset()
                 timer.start()
-            elif key == ord('h'):
+            elif key == config.keys['show_hide_instructions']:
                 self._toggle_instructions_visibility()
 
         else:
@@ -260,7 +262,7 @@ if __name__ == "__main__":
     # Is called every time the screen is resized, so from here on everything must be stateless
     while True:
         try:
-            Screen.wrapper(pomodoro)
+            Screen.wrapper(pomodoro, catch_interrupt=True)
             sys.exit(0)
         except ResizeScreenError:
             pass

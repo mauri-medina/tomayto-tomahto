@@ -45,3 +45,12 @@ instructions = dict(
 )
 
 alarm_sound_file = 'analog-alarm-clock.wav'
+
+keys = dict(
+    time_pomodoro=ord('p'),
+    time_short_break=ord('s'),
+    time_long_break=ord('l'),
+    reset_timer=ord('r'),
+    show_hide_instructions=ord('h'),
+    start_stop_timer=32             # space key code
+)
