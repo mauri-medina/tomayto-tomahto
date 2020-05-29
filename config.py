@@ -10,8 +10,8 @@ COLOR_WHITE = 7
 
 timer = dict(
     font='larry3d',
-    font_color=COLOR_BLUE,
-    background_color=COLOR_GREEN,
+    font_color=COLOR_BLACK,
+    background_color=COLOR_CYAN,
     position={
         # Top lef corner
         'x': 5,  # %
