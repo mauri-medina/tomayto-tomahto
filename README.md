@@ -2,6 +2,7 @@
 tomayto-tomahto is a fully customizable pomodoro timer for the command line
 ![pomodoro example](resources/img/pomodo-example.png)
 
+inspired by the design of https://tomato-timer.com/
 ## Installation
 
 ```bash
