@@ -3,6 +3,6 @@ future==0.18.2
 Pillow==8.1.1
 pyfiglet==0.8.post1
 pypiwin32==223
-pywin32==227
+pywin32==301
 wcwidth==0.1.9
 playsound>=1.2.2
